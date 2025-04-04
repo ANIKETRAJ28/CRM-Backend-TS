@@ -1,0 +1,105 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model user {
+  id              String     @id @default(uuid())
+  name            String
+  email           String     @unique
+  password        String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  user_org        user_org[]
+  ticketsAssigned ticket[]   @relation("TicketAssignee")
+  ticketsReported ticket[]   @relation("TicketReporter")
+}
+
+model org {
+  id         String       @id @default(uuid())
+  name       String       @unique
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  user_org   user_org[]
+  org_invite org_invite[]
+  tickets   ticket[]
+}
+
+model user_org {
+  id        String   @id @default(uuid())
+  user      user     @relation(fields: [userId], references: [id])
+  userId    String
+  org       org      @relation(fields: [orgId], references: [id])
+  orgId     String
+  role      Role
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, orgId])
+}
+
+model org_invite {
+  id        String   @id @default(uuid())
+  org       org      @relation(fields: [orgId], references: [id])
+  orgId     String
+  email     String
+  hashCode  String   @unique
+  expiryAt  DateTime
+  role      Role     @default(ENGINEER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ticket {
+  id          String         @id @default(uuid())
+  title       String
+  description String
+  status      TicketStatus
+  priority    TicketPriority
+  org     org       @relation(fields: [orgId], references: [id])
+  orgId   String
+  assignee    user           @relation("TicketAssignee", fields: [assigneeId], references: [id])
+  reporter    user           @relation("TicketReporter", fields: [reporterId], references: [id])
+  assigneeId  String
+  reporterId  String
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model register {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  isRegistered Boolean @default(false)
+  otp       String  @db.VarChar(6)
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  PROGRESS
+  RESOLVED
+  CLOSED
+  HOLD
+}
+
+enum Role {
+  ADMIN
+  ENGINEER
+  USER
+}
