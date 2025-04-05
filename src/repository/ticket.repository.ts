@@ -75,7 +75,7 @@ export class TicketRepository {
           assigneeName: randomEngineerData.name,
           assigneeEmail: randomEngineerData.email,
           reporterId: data.reporterId,
-          reporterName: data.reporterName,
+          reporterName: user.name,
           reporterEmail: data.reporterEmail,
           reporterRole: role,
         },
