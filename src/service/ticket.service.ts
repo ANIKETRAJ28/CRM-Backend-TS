@@ -17,12 +17,13 @@ export class TicketService {
   }
 
   async createTicket(
+    userId: string,
     orgId: string,
     role: IUserOrgRole,
     data: ITicketRequest
   ): Promise<ITicketReporterResponse | ITicketAdminResponse> {
     try {
-      return this.ticketRepository.createTicket(orgId, role, data);
+      return this.ticketRepository.createTicket(userId, orgId, role, data);
     } catch (error) {
       throw error;
     }

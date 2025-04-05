@@ -15,6 +15,7 @@ import {
 import { BadRequest, InternalServerError } from "../utils/api.util";
 import { UserRepository } from "./user.repository";
 import { UserOrgRepository } from "./userOrg.repository";
+import { wss, clients } from "../index";
 
 export class TicketRepository {
   private userOrgRepository: UserOrgRepository;
@@ -26,6 +27,7 @@ export class TicketRepository {
   }
 
   async createTicket(
+    userId: string,
     orgId: string,
     role: IUserOrgRole,
     data: ITicketRequest
@@ -46,6 +48,9 @@ export class TicketRepository {
       const randomEngineerData = await this.userRepository.getUserById(
         randomEngineer.userId
       );
+      const admin = await this.userOrgRepository.getOrgAdmin(orgId);
+      const user = await this.userRepository.getUserById(userId);
+
       const ticket: ITicket = await prisma.ticket.create({
         data: {
           title: data.title,
@@ -57,8 +62,9 @@ export class TicketRepository {
           reporterId: data.reporterId,
         },
       });
-      if (role === "ADMIN") {
-        return {
+      const adminRes = {
+        type: "admin",
+        ticket: {
           id: ticket.id,
           title: ticket.title,
           description: ticket.description,
@@ -72,7 +78,33 @@ export class TicketRepository {
           reporterName: data.reporterName,
           reporterEmail: data.reporterEmail,
           reporterRole: role,
-        };
+        },
+      };
+      const engineerRes = {
+        type: "assigned",
+        ticket: {
+          id: ticket.id,
+          title: ticket.title,
+          description: ticket.description,
+          priority: ticket.priority,
+          status: ticket.status,
+          orgId: ticket.orgId,
+          reporterName: user.name,
+          reporterId: user.id,
+          reporterEmail: user.email,
+          reporterRole: role,
+        },
+      };
+      const engineerWs = clients.get(randomEngineer.userId);
+      if (engineerWs) {
+        engineerWs.send(JSON.stringify(engineerRes), { binary: false });
+      }
+      if (role === "ADMIN") {
+        return adminRes.ticket;
+      }
+      const adminWs = clients.get(admin.userId);
+      if (adminWs) {
+        adminWs.send(JSON.stringify(adminRes), { binary: false });
       }
       return {
         id: ticket.id,
@@ -168,10 +200,53 @@ export class TicketRepository {
         },
       });
       const userData = await this.userRepository.getUserById(ticket.reporterId);
+      const engineerData = await this.userRepository.getUserById(
+        ticket.assigneeId
+      );
+      const admin = await this.userOrgRepository.getOrgAdmin(orgId);
       const userOrgData = await this.userOrgRepository.getUserByUserIdOrgId(
         userData.id,
         orgId
       );
+      const adminRes: { type: string; ticket: ITicketAdminResponse } = {
+        type: "admin",
+        ticket: {
+          id: ticket.id,
+          title: ticket.title,
+          description: ticket.description,
+          priority: ticket.priority,
+          status: ticket.status,
+          orgId: ticket.orgId,
+          assigneeId: engineerData.id,
+          assigneeName: engineerData.name,
+          assigneeEmail: engineerData.email,
+          reporterId: ticket.reporterId,
+          reporterName: userData.name,
+          reporterEmail: userData.email,
+          reporterRole: userOrgData.role,
+        },
+      };
+      const userRes: { type: string; ticket: ITicketReporterResponse } = {
+        type: "reported",
+        ticket: {
+          id: ticket.id,
+          title: ticket.title,
+          description: ticket.description,
+          priority: ticket.priority,
+          status: ticket.status,
+          orgId: ticket.orgId,
+          assigneeId: ticket.assigneeId,
+          assigneeName: engineerData.name,
+        },
+      };
+      const userWs = clients.get(ticket.reporterId);
+      if (userWs) {
+        userWs.send(JSON.stringify(userRes), { binary: false });
+      }
+      const adminWs = clients.get(admin.userId);
+      if (adminWs) {
+        adminWs.send(JSON.stringify(adminRes), { binary: false });
+      }
       return {
         id: ticket.id,
         title: ticket.title,

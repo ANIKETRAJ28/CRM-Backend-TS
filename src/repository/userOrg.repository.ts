@@ -252,4 +252,29 @@ export class UserOrgRepository {
       throw new BadRequest("An unknown error occurred", error);
     }
   }
+
+  async getOrgAdmin(orgId: string): Promise<IUserOrgResponse> {
+    try {
+      const userOrg = await prisma.user_org.findFirst({
+        where: {
+          orgId,
+          role: "ADMIN",
+        },
+      });
+      if (userOrg === null) {
+        throw new BadRequest("Org admin not found");
+      }
+      return {
+        id: userOrg.id,
+        orgId: userOrg.orgId,
+        role: userOrg.role,
+        userId: userOrg.userId,
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        throw new InternalServerError(error.message);
+      }
+      throw new BadRequest("An unknown error occurred", error);
+    }
+  }
 }

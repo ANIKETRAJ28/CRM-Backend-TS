@@ -37,7 +37,7 @@ export class TicketController {
       }
       const data: Omit<ITicketRequest, "userOrgId" | "assigneeId"> = req.body;
       const ticket: ITicketReporterResponse | ITicketAdminResponse =
-        await this.ticketService.createTicket(orgId, role, {
+        await this.ticketService.createTicket(userId, orgId, role, {
           ...data,
           orgId,
           reporterEmail: email,
