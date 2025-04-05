@@ -10,6 +10,8 @@ import {
   Unauthorized,
 } from "../utils/api.util";
 import { UserRepository } from "./user.repository";
+import { mail } from "../utils/mail.util";
+import { inviteTemplate } from "../utils/inviteTemplate.util";
 
 export class OrgInviteRepository {
   private userRepository: UserRepository;
@@ -37,6 +39,14 @@ export class OrgInviteRepository {
       if (userOrg) {
         throw new Unauthorized("User already exist in the org");
       }
+      const org = await prisma.org.findUnique({
+        where: {
+          id: data.orgId,
+        },
+      });
+      if (!org) {
+        throw new BadRequest("Org not found");
+      }
       const orgInvite = await prisma.org_invite.create({
         data: {
           email: data.email,
@@ -45,6 +55,12 @@ export class OrgInviteRepository {
           expiryAt: data.expiryAt,
           hashCode: data.hashCode,
         },
+      });
+      mail.sendMail({
+        to: data.email,
+        subject: "Org Invite",
+        text: "You have been invited to join an org",
+        html: inviteTemplate(data.email, org.name, data.hashCode),
       });
       return orgInvite;
     } catch (error) {

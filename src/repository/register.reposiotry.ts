@@ -4,6 +4,8 @@ import { prisma } from "../config/db.config";
 import { IRegister } from "../interface/register.interface";
 import { BadRequest, InternalServerError } from "../utils/api.util";
 import { UserRepository } from "./user.repository";
+import { mail } from "../utils/mail.util";
+import { otpTemplate } from "../utils/otpTemplate.util";
 
 export class RegisterRepository {
   private userRepository: UserRepository;
@@ -38,6 +40,12 @@ export class RegisterRepository {
           email,
           otp,
         },
+      });
+      mail.sendMail({
+        to: email,
+        subject: "OTP for Registration",
+        text: `Your OTP is ${otp}`,
+        html: otpTemplate(email, otp),
       });
       return user;
     } catch (error) {
