@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { CookieOptions, NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
 import {
@@ -154,10 +154,18 @@ export function getUserInfo(req: Request, res: Response): void {
 
 export function logout(req: Request, res: Response): void {
   try {
-    res.clearCookie("JWT");
-    res.clearCookie("ORG");
-    res.clearCookie("PROFILE");
-    res.clearCookie("OTP");
+    const options = {
+      // domain: FRONTEND_URL, // Only allow this domain
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+      httpOnly: true, // Don't expose cookie to JS
+      secure: true, // Required for HTTPS (Render uses HTTPS)
+      sameSite: "none", // Or "None" if frontend/backend are on different subdomains
+      path: "/",
+    } as CookieOptions;
+    res.clearCookie("JWT", options);
+    res.clearCookie("ORG", options);
+    res.clearCookie("PROFILE", options);
+    res.clearCookie("OTP", options);
     sendResponse(res, new Success("Logout successful"));
   } catch (error) {
     if (error instanceof Error) {

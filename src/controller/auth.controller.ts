@@ -45,7 +45,7 @@ export class AuthController {
         sameSite: "none", // Or "None" if frontend/backend are on different subdomains
         path: "/",
       } as CookieOptions;
-      res.clearCookie("PROFILE");
+      res.clearCookie("PROFILE", options);
       res.cookie("JWT", token, options);
       sendResponse(res, new Created("User registered successfully"));
     } catch (error) {

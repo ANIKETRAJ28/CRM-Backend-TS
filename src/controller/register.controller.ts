@@ -83,7 +83,7 @@ export class RegisterController {
         sameSite: "none", // Or "None" if frontend/backend are on different subdomains
         path: "/",
       } as CookieOptions;
-      res.clearCookie("OTP");
+      res.clearCookie("OTP", options);
       res.cookie("PROFILE", profileToken, options);
       sendResponse(res, new Created("Create profile", { step: "profile" }));
     } catch (error) {
