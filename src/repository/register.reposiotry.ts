@@ -25,7 +25,7 @@ export class RegisterRepository {
           email,
         },
       });
-      if (user?.isRegistered) {
+      if (user && user.isRegistered) {
         return user;
       }
       const otp = crypto.randomInt(100000, 999999).toString();

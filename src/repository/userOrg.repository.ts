@@ -208,7 +208,7 @@ export class UserOrgRepository {
 
   async getOrgEngineers(orgId: string): Promise<IUserOrgResponse[]> {
     try {
-      const userOrgs = await prisma.user_org.findMany({
+      const userOrgs: IUserOrg[] = await prisma.user_org.findMany({
         where: {
           orgId,
           role: "ENGINEER",
