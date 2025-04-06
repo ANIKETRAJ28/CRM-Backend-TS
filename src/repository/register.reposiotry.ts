@@ -20,7 +20,7 @@ export class RegisterRepository {
       if (existingUser) {
         throw new BadRequest("User already exists");
       }
-      let user: IRegister | null = await prisma.register.findUnique({
+      const user: IRegister | null = await prisma.register.findUnique({
         where: {
           email,
         },
@@ -29,7 +29,7 @@ export class RegisterRepository {
         return user;
       }
       const otp = crypto.randomInt(100000, 999999).toString();
-      user = await prisma.register.upsert({
+      const newRegister: IRegister = await prisma.register.upsert({
         where: {
           email,
         },
@@ -47,7 +47,7 @@ export class RegisterRepository {
         text: `Your OTP is ${otp}`,
         html: otpTemplate(email, otp),
       });
-      return user;
+      return newRegister;
     } catch (error) {
       if (error instanceof Error) {
         throw new InternalServerError(error.message);
@@ -61,7 +61,7 @@ export class RegisterRepository {
     otp: string
   ): Promise<IRegister> {
     try {
-      const user: IRegister | null = await prisma.register.findUnique({
+      const user = await prisma.register.findUnique({
         where: {
           email,
         },
