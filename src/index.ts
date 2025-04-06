@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 
-import { FRONTEND_URL } from "./config/env.config";
+import { FRONTEND_URL, PORT } from "./config/env.config";
 import { router } from "./routes";
 import { WebSocket, WebSocketServer } from "ws";
 
@@ -20,8 +20,8 @@ app.use(cookieParser());
 
 app.use("/api", router);
 
-export const server = app.listen(3000, () => {
-  console.log("Server up!");
+export const server = app.listen(PORT, () => {
+  console.log("Server up! on port", PORT);
 });
 
 export const wss = new WebSocketServer({ server });
