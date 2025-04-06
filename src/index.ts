@@ -8,12 +8,12 @@ import { WebSocket, WebSocketServer } from "ws";
 
 const app = express();
 
-// const corsOptions = {
-//   origin: FRONTEND_URL,
-//   credentials: true,
-// };
+const corsOptions = {
+  origin: FRONTEND_URL,
+  credentials: true,
+};
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
