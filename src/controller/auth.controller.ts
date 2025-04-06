@@ -14,6 +14,7 @@ import { createJWTtoken, createORGToken } from "../utils/jwt.util";
 import { AuthService } from "../service/auth.service";
 import { UserOrgService } from "../service/userOrg.service";
 import { getProfileInfo } from "../middleware/auth.middleware";
+import { FRONTEND_URL } from "../config/env.config";
 
 export class AuthController {
   private authService: AuthService;
@@ -37,11 +38,11 @@ export class AuthController {
       });
       const token = createJWTtoken(user);
       const options = {
-        domain: "localhost", // Can be changed for a production domain
-        maxAge: 1000 * 60 * 60 * 24, // 1 day in ms
-        httpOnly: true, // For security, use true if not needed in JS
-        secure: false, // Use true only for production (HTTPS)
-        sameSite: "lax", // Change to 'None' for production with HTTPS
+        domain: FRONTEND_URL, // Only allow this domain
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        httpOnly: true, // Don't expose cookie to JS
+        secure: true, // Required for HTTPS (Render uses HTTPS)
+        sameSite: "lax", // Or "None" if frontend/backend are on different subdomains
         path: "/",
       } as CookieOptions;
       res.clearCookie("PROFILE");
@@ -62,11 +63,11 @@ export class AuthController {
       const user = await this.authService.signIn(signInPayload);
       const token = createJWTtoken(user);
       const options = {
-        domain: "localhost", // Can be changed for a production domain
-        maxAge: 1000 * 60 * 60 * 24, // 1 day in ms
-        httpOnly: true, // For security, use true if not needed in JS
-        secure: false, // Use true only for production (HTTPS)
-        sameSite: "lax", // Change to 'None' for production with HTTPS
+        domain: FRONTEND_URL, // Only allow this domain
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        httpOnly: true, // Don't expose cookie to JS
+        secure: true, // Required for HTTPS (Render uses HTTPS)
+        sameSite: "lax", // Or "None" if frontend/backend are on different subdomains
         path: "/",
       } as CookieOptions;
       res.cookie("JWT", token, options);
@@ -93,11 +94,11 @@ export class AuthController {
       );
       const orgToken = createORGToken({ orgId: userOrg.orgId });
       const options = {
-        domain: "localhost", // Can be changed for a production domain
-        maxAge: 1000 * 60 * 60 * 24, // 1 day in ms
-        httpOnly: true, // For security, use true if not needed in JS
-        secure: false, // Use true only for production (HTTPS)
-        sameSite: "lax", // Change to 'None' for production with HTTPS
+        domain: FRONTEND_URL, // Only allow this domain
+        maxAge: 1000 * 60 * 60 * 24, // 1 day
+        httpOnly: true, // Don't expose cookie to JS
+        secure: true, // Required for HTTPS (Render uses HTTPS)
+        sameSite: "lax", // Or "None" if frontend/backend are on different subdomains
         path: "/",
       } as CookieOptions;
       res.cookie("ORG", orgToken, options);
