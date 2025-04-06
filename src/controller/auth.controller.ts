@@ -38,7 +38,7 @@ export class AuthController {
       });
       const token = createJWTtoken(user);
       const options = {
-        domain: FRONTEND_URL, // Only allow this domain
+        // domain: FRONTEND_URL, // Only allow this domain
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true, // Don't expose cookie to JS
         secure: true, // Required for HTTPS (Render uses HTTPS)
@@ -63,7 +63,7 @@ export class AuthController {
       const user = await this.authService.signIn(signInPayload);
       const token = createJWTtoken(user);
       const options = {
-        domain: FRONTEND_URL, // Only allow this domain
+        // domain: FRONTEND_URL, // Only allow this domain
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true, // Don't expose cookie to JS
         secure: true, // Required for HTTPS (Render uses HTTPS)
@@ -94,7 +94,7 @@ export class AuthController {
       );
       const orgToken = createORGToken({ orgId: userOrg.orgId });
       const options = {
-        domain: FRONTEND_URL, // Only allow this domain
+        // domain: FRONTEND_URL, // Only allow this domain
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true, // Don't expose cookie to JS
         secure: true, // Required for HTTPS (Render uses HTTPS)

@@ -25,9 +25,9 @@ export class RegisterController {
         throw new BadRequest("Email is required");
       }
       const user: IRegister = await this.registerService.registerUser(email);
-      console.log("url...", FRONTEND_URL);
+      // console.log("url...", FRONTEND_URL);
       const options = {
-        domain: FRONTEND_URL, // Only allow this domain
+        // domain: FRONTEND_URL, // Only allow this domain
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true, // Don't expose cookie to JS
         secure: true, // Required for HTTPS (Render uses HTTPS)
@@ -76,7 +76,7 @@ export class RegisterController {
         );
       const profileToken = createProfileToken({ email: user.email });
       const options = {
-        domain: FRONTEND_URL, // Only allow this domain
+        // domain: FRONTEND_URL, // Only allow this domain
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true, // Don't expose cookie to JS
         secure: true, // Required for HTTPS (Render uses HTTPS)

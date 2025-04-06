@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc -b",
     "start": "tsc -b && node dist/index.js",
-    "prisma:generate": "prisma generate"
+    "prisma:generate": "npx prisma generate"
   },
   "author": "",
   "license": "ISC",
