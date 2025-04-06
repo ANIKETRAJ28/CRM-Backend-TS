@@ -25,12 +25,13 @@ export class RegisterController {
         throw new BadRequest("Email is required");
       }
       const user: IRegister = await this.registerService.registerUser(email);
+      console.log("url...", FRONTEND_URL);
       const options = {
         domain: FRONTEND_URL, // Only allow this domain
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true, // Don't expose cookie to JS
         secure: true, // Required for HTTPS (Render uses HTTPS)
-        sameSite: "lax", // Or "None" if frontend/backend are on different subdomains
+        sameSite: "none", // Or "None" if frontend/backend are on different subdomains
         path: "/",
       } as CookieOptions;
       if (user.isRegistered) {
@@ -79,7 +80,7 @@ export class RegisterController {
         maxAge: 1000 * 60 * 60 * 24, // 1 day
         httpOnly: true, // Don't expose cookie to JS
         secure: true, // Required for HTTPS (Render uses HTTPS)
-        sameSite: "lax", // Or "None" if frontend/backend are on different subdomains
+        sameSite: "none", // Or "None" if frontend/backend are on different subdomains
         path: "/",
       } as CookieOptions;
       res.clearCookie("OTP");
