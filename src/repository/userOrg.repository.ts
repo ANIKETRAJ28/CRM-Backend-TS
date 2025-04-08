@@ -10,6 +10,7 @@ import { IOrg, IOrgResponse } from "../interface/org.interface";
 import { OrgInviteRepository } from "./userOrgInvite.repository";
 import { UserRepository } from "./user.repository";
 import { IUserOrgMember, IUserResponse } from "../interface/user.interface";
+import { clients } from "../index";
 
 export class UserOrgRepository {
   private orgInviteReposiotry: OrgInviteRepository;
@@ -135,11 +136,34 @@ export class UserOrgRepository {
       if (getUserOrg) {
         throw new BadRequest("User already in the org");
       }
+      const adminUserOrg = await prisma.user_org.findFirst({
+        where: {
+          orgId: org.id,
+          role: "ADMIN",
+        },
+      });
+      if (adminUserOrg === null) {
+        throw new BadRequest("Admin not found in the org");
+      }
+      const userData = await this.userRepositoy.getUserById(userId);
       const userOrg = await this.createUserOrg({
         userId,
         orgId: org.id,
         role: "USER",
       });
+      const adminWs = clients.get(adminUserOrg.userId);
+      const adminRes = {
+        type: "member",
+        ticket: {
+          id: userId,
+          email: userData.email,
+          name: userData.email,
+          role: "USER",
+        },
+      };
+      if (adminWs) {
+        adminWs.send(JSON.stringify(adminRes), { binary: false });
+      }
       return {
         id: userOrg.id,
         userId: userId,
@@ -181,6 +205,15 @@ export class UserOrgRepository {
           id: orgInvite.orgId,
         },
       });
+      const adminUserOrg = await prisma.user_org.findFirst({
+        where: {
+          orgId: orgInvite.orgId,
+          role: "ADMIN",
+        },
+      });
+      if (adminUserOrg === null) {
+        throw new BadRequest("Admin not found in the org");
+      }
       if (orgDetail === null) {
         throw new BadRequest("Org not found");
       }
@@ -189,6 +222,19 @@ export class UserOrgRepository {
         orgId: orgInvite.orgId,
         role: orgInvite.role,
       });
+      const adminWs = clients.get(adminUserOrg.userId);
+      const adminRes = {
+        type: "member",
+        ticket: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: "ENGINEER",
+        },
+      };
+      if (adminWs) {
+        adminWs.send(JSON.stringify(adminRes), { binary: false });
+      }
       return {
         id: userOrg.id,
         userId: userOrg.userId,

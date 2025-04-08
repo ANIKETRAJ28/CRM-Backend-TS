@@ -6,6 +6,7 @@ import { BadRequest, InternalServerError } from "../utils/api.util";
 import { UserRepository } from "./user.repository";
 import { mail } from "../utils/mail.util";
 import { otpTemplate } from "../utils/otpTemplate.util";
+import { ENVIRONMENT, OTP } from "../config/env.config";
 
 export class RegisterRepository {
   private userRepository: UserRepository;
@@ -28,7 +29,10 @@ export class RegisterRepository {
       if (user && user.isRegistered) {
         return user;
       }
-      const otp = crypto.randomInt(100000, 999999).toString();
+      const otp =
+        ENVIRONMENT === "development"
+          ? OTP
+          : crypto.randomInt(100000, 999999).toString();
       const newRegister: IRegister = await prisma.register.upsert({
         where: {
           email,
@@ -41,12 +45,14 @@ export class RegisterRepository {
           otp,
         },
       });
-      mail.sendMail({
-        to: email,
-        subject: "OTP for Registration",
-        text: `Your OTP is ${otp}`,
-        html: otpTemplate(email, otp),
-      });
+      if (ENVIRONMENT === "production") {
+        mail.sendMail({
+          to: email,
+          subject: "OTP for Registration",
+          text: `Your OTP is ${otp}`,
+          html: otpTemplate(email, otp),
+        });
+      }
       return newRegister;
     } catch (error) {
       if (error instanceof Error) {

@@ -12,6 +12,7 @@ import {
 import { UserRepository } from "./user.repository";
 import { mail } from "../utils/mail.util";
 import { inviteTemplate } from "../utils/inviteTemplate.util";
+import { ENVIRONMENT } from "../config/env.config";
 
 export class OrgInviteRepository {
   private userRepository: UserRepository;
@@ -56,12 +57,14 @@ export class OrgInviteRepository {
           hashCode: data.hashCode,
         },
       });
-      mail.sendMail({
-        to: data.email,
-        subject: "Org Invite",
-        text: "You have been invited to join an org",
-        html: inviteTemplate(data.email, org.name, data.hashCode),
-      });
+      if (ENVIRONMENT === "production") {
+        mail.sendMail({
+          to: data.email,
+          subject: "Org Invite",
+          text: "You have been invited to join an org",
+          html: inviteTemplate(data.email, org.name, data.hashCode),
+        });
+      }
       return orgInvite;
     } catch (error) {
       if (error instanceof Error) {
