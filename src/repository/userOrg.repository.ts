@@ -157,7 +157,7 @@ export class UserOrgRepository {
         ticket: {
           id: userId,
           email: userData.email,
-          name: userData.email,
+          name: userData.name,
           role: "USER",
         },
       };
