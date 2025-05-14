@@ -5,6 +5,7 @@ import cors from "cors";
 import { FRONTEND_URL, PORT } from "./config/env.config";
 import { router } from "./routes";
 import { WebSocket, WebSocketServer } from "ws";
+import { scheduleCron } from "./job/cron.job";
 
 const app = express();
 
@@ -20,8 +21,13 @@ app.use(cookieParser());
 
 app.use("/api", router);
 
+app.get("/", (_req, res) => {
+  res.send("Server is running...");
+});
+
 export const server = app.listen(PORT, () => {
   console.log("Server up! on port", PORT);
+  scheduleCron();
 });
 
 export const wss = new WebSocketServer({ server });
